@@ -1,0 +1,18 @@
+# vim: ft=dockerfile
+FROM gladiatr72/misc:go-build
+
+SHELL ["/bin/bash", "-c"]
+
+RUN mkdir -pv /home/user/go/src/github.com/kubernetes-sigs $HOME/outbox
+
+WORKDIR /home/user/go/src/github.com/kubernetes-sigs
+
+RUN git clone --depth 150 https://github.com/kubernetes-sigs/kustomize
+
+WORKDIR /home/user/go/src/github.com/kubernetes-sigs/kustomize/kustomize
+
+ARG VERSION
+ENV VERSION=${VERSION}
+
+
+

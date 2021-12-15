@@ -1,0 +1,28 @@
+ARG PROJECT
+
+FROM gladiatr72/misc:${PROJECT}-src
+
+USER root
+
+RUN apk add gcc musl-dev
+
+USER user
+
+ARG VERSION
+ENV VERSION ${VERSION}
+ARG DATE
+ENV DATE ${DATE}
+ARG COMMIT
+
+RUN git fetch && git checkout kustomize/${VERSION}
+
+ENV CGO_ENABLED 1
+ENV GO111MODULE=on
+
+RUN go mod download
+
+RUN go build -ldflags="-s -X sigs.k8s.io/kustomize/api/provenance.version=${VERSION} \
+      -X sigs.k8s.io/kustomize/api/provenance.gitCommit=${COMMIT} \
+      -X sigs.k8s.io/kustomize/api/provenance.buildDate=${DATE}"
+
+

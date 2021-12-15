@@ -1,0 +1,32 @@
+ARG PROJECT
+
+FROM gladiatr72/misc:${PROJECT}-src
+
+USER root
+
+RUN \
+	apt update && \
+	apt -y install gcc libc6-dev
+
+USER user
+
+ARG VERSION
+ENV VERSION ${VERSION}
+ARG DATE
+ENV DATE ${DATE}
+ARG COMMIT
+
+RUN git fetch && git checkout kustomize/${VERSION}
+
+ENV CGO_ENABLED 0
+ENV GO111MODULE=on
+
+RUN go mod download
+
+RUN \
+	COMMIT=$( git rev-parse HEAD )  && \
+	go build -ldflags="-s -X sigs.k8s.io/kustomize/api/provenance.version=${VERSION} \
+	      -X sigs.k8s.io/kustomize/api/provenance.gitCommit=${COMMIT} \
+	      -X sigs.k8s.io/kustomize/api/provenance.buildDate=${DATE}"
+
+
